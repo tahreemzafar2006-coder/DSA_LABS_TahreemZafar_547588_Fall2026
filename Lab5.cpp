@@ -1,5 +1,6 @@
 #include <vector>
 #include <iostream>
+#include<queue>
 using namespace std;
 struct Node {
     int data;
@@ -112,9 +113,64 @@ int getNodeDepth(Node* node) {
     // 1 + depth of parent
     return 1 + getNodeDepth(node->parent);
 }
+//Task 4 
+void breadthFirstTraversal(Node* root) {
+    if (root == nullptr) return;
+    queue<Node*> q;
+    q.push(root);
+    while (!q.empty()) {
+        Node* current = q.front();
+        q.pop();
+        cout << current->data << " ";
+        for (Node* child : current->child) {
+            q.push(child);
+        }
+    }
+}
+void preOrderTraversal(Node* root) {
+    if (root == nullptr) return;
+    cout << root->data << " ";
+    for (Node* child : root->child) {
+        preOrderTraversal(child);
+    }
+}
+
+void postOrderTraversal(Node* root) {
+    if (root == nullptr) return;
+    for (Node* child : root->child) {
+        postOrderTraversal(child);
+    }
+    cout << root->data << " ";
+}
+//Task 5 
+void deleteSubtree(Node* node) {
+    if (node == nullptr) return;
+    for (Node* child : node->child) {
+        deleteSubtree(child);
+    }
+    delete node;
+}
+void deleteNode(Node*& root, Node* target) {// Function to delete a node and its descendants, updating the parent's child list
+    if (target == nullptr) return;
+    // Case 1: Target is the root (delete entire tree)
+    if (target->parent == nullptr) {
+        deleteSubtree(root);
+        root = nullptr;
+        return;
+    }
+    // Case 2: Target has a parent, remove pointer from parent's vector
+    Node* parentNode = target->parent;
+    for (auto it = parentNode->child.begin(); it != parentNode->child.end(); ++it) {
+        if (*it == target) {
+            parentNode->child.erase(it);
+            break;
+        }
+    } // Recursively free all nodes in the target's subtree
+    deleteSubtree(target);
+}
 
 int main() {
-    int choice;
+    //task 1
     // Level 0
     Node* root = createNode(1);
     // Level 1
@@ -130,12 +186,34 @@ int main() {
     addChild(root->child[2], 10);
     cout << "General Tree Node Details\n";
     displayTree(root);
+    //task 2 
     int totalNodes = countNodes(root);
         cout << "\nTotal number of nodes in the tree: " << totalNodes << endl;
-
+//task 3 
     cout << "\nTree Height: " << getTreeHeight(root) << endl;
     Node* fixedNode = root->child[1];
     cout << "Selected Node Value: " << fixedNode->data << endl;
     cout << "Depth of Selected Node: " << getNodeDepth(fixedNode) << endl;
+    //task 4 
+    cout << "\n Traversals\n";
+    cout << "Breadth-First Traversal (BFS): ";
+    breadthFirstTraversal(root);
+    cout << endl;
+    cout << "Pre-Order Traversal: ";
+    preOrderTraversal(root);
+    cout << endl;
+    cout << "Post-Order Traversal: ";
+    postOrderTraversal(root);
+    cout << endl;
+    //Task 5
+    cout << "TREE BEFORE DELETION\n";
+    displayTree(root);
+    cout << "Total Nodes before deletion: " << countNodes(root) << endl;// Let's select a specific node to delete (e.g., Node 3, which is root->child[1])
+    Node* nodeToDelete = root->child[1]; 
+    cout << "\nDeleting Node " << nodeToDelete->data << " and all its descendants...\n";
+    deleteNode(root, nodeToDelete);
+    cout << "\n TREE AFTER DELETION \n";
+    displayTree(root);
+    cout << "Total Nodes after deletion: " << countNodes(root) << endl;
     return 0;
 }
